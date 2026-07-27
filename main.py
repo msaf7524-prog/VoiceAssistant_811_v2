@@ -1,47 +1,35 @@
 from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
 from kivy.uix.button import Button
+from kivy.clock import Clock
+
+from jnius import autoclass
+
+TextToSpeech = autoclass('android.speech.tts.TextToSpeech')
+Locale = autoclass('java.util.Locale')
+PythonActivity = autoclass('org.kivy.android.PythonActivity')
 
 
-class MainLayout(BoxLayout):
-    def __init__(self, **kwargs):
-        super().__init__(orientation="vertical", spacing=20, padding=20, **kwargs)
-
-        self.add_widget(
-            Label(
-                text="Voice Assistant 811",
-                font_size="28sp"
-            )
-        )
-
-        self.status = Label(
-            text="Project Version 2.0",
-            font_size="18sp"
-        )
-
-        self.add_widget(self.status)
-
-        btn = Button(
-            text="Start Assistant",
-            size_hint=(1, None),
-            height=55
-        )
-
-        btn.bind(on_press=self.start)
-
-        self.add_widget(btn)
-
-    def start(self, instance):
-        self.status.text = "Assistant is starting..."
-
-
-class VoiceAssistantApp(App):
-
+class VoiceApp(App):
     def build(self):
-        self.title = "Voice Assistant 811"
-        return MainLayout()
+        self.tts = None
+        btn = Button(text="Start Assistant")
+        btn.bind(on_press=self.speak)
+        Clock.schedule_once(self.init_tts, 0)
+        return btn
+
+    def init_tts(self, dt):
+        activity = PythonActivity.mActivity
+        self.tts = TextToSpeech(activity, None)
+        self.tts.setLanguage(Locale.US)
+
+    def speak(self, instance):
+        if self.tts:
+            self.tts.speak(
+                "Hello, I am Voice Assistant 811",
+                TextToSpeech.QUEUE_FLUSH,
+                None,
+                "test"
+            )
 
 
-if __name__ == "__main__":
-    VoiceAssistantApp().run()
+VoiceApp().run()
