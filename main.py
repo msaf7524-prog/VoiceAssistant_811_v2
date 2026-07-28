@@ -1,32 +1,69 @@
 from kivy.app import App
 from kivy.uix.button import Button
-from jnius import autoclass, PythonJavaClass, java_method
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.clock import Clock
 
-PythonActivity = autoclass("org.kivy.android.PythonActivity")
-TextToSpeech = autoclass("android.speech.tts.TextToSpeech")
-Locale = autoclass("java.util.Locale")
+from android.permissions import request_permissions, Permission
 
-
-class TTSListener(PythonJavaClass):
-    __javainterfaces__ = ['android/speech/tts/TextToSpeech$OnInitListener']
-
-    @java_method('(I)V')
-    def onInit(self, status):
-        pass
+from speech_engine import SpeechEngine
+from tts_engine import TTSEngine
 
 
-class VoiceApp(App):
+class MainLayout(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(orientation="vertical", padding=20, spacing=20, **kwargs)
+
+        self.status = Label(text="Assistant is stopped", font_size="20sp")
+        self.add_widget(self.status)
+
+        self.btn_start = Button(text="Start Assistant", size_hint_y=None, height=60)
+        self.btn_start.bind(on_press=self.start_assistant)
+        self.add_widget(self.btn_start)
+
+        self.btn_stop = Button(text="Stop Assistant", size_hint_y=None, height=60)
+        self.btn_stop.bind(on_press=self.stop_assistant)
+        self.add_widget(self.btn_stop)
+
+        self.speech_engine = None
+        self.tts_engine = None
+
+    def start_assistant(self, instance):
+        request_permissions([Permission.RECORD_AUDIO])
+
+        self.tts_engine = TTSEngine(language="en_US")
+        self.speech_engine = SpeechEngine(callback=self.on_text, language="en-US")
+
+        try:
+            self.speech_engine.start()
+            self.status.text = "Listening..."
+            if self.tts_engine:
+                self.tts_engine.speak("Hello, I am Voice Assistant 811")
+        except Exception as e:
+            self.status.text = f"Start error: {e}"
+
+    def stop_assistant(self, instance):
+        try:
+            if self.speech_engine:
+                self.speech_engine.stop()
+            if self.tts_engine:
+                self.tts_engine.stop()
+            self.status.text = "Assistant is stopped"
+        except Exception as e:
+            self.status.text = f"Stop error: {e}"
+
+    def on_text(self, text):
+        Clock.schedule_once(lambda dt: self._update_text(text))
+
+    def _update_text(self, text):
+        self.status.text = f"Recognized: {text}"
+
+
+class VoiceAssistantApp(App):
     def build(self):
-        self.listener = TTSListener()
-        self.tts = TextToSpeech(PythonActivity.mActivity, self.listener)
-
-        btn = Button(text="Start Assistant")
-        btn.bind(on_press=self.speak)
-        return btn
-
-    def speak(self, instance):
-        self.tts.setLanguage(Locale.US)
-        self.tts.speak("Hello", 0, None)
+        self.title = "Voice Assistant 811"
+        return MainLayout()
 
 
-VoiceApp().run()
+if __name__ == "__main__":
+    VoiceAssistantApp().run()
