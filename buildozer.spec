@@ -1,5 +1,4 @@
 [app]
-
 title = VoiceAssistant
 package.name = voiceassistant
 package.domain = org.test
@@ -9,7 +8,7 @@ source.include_exts = py,png,jpg,kv,atlas,ttf,wav,mp3
 
 version = 0.1
 
-requirements = python3,kivy,requests,urllib3,certifi,charset_normalizer,idna,plyer,pyjnius
+requirements = python3,kivy,pyjnius
 
 android.permissions = INTERNET,RECORD_AUDIO,BLUETOOTH,BLUETOOTH_ADMIN,BLUETOOTH_CONNECT,MODIFY_AUDIO_SETTINGS,POST_NOTIFICATIONS
 
