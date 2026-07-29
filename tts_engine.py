@@ -6,7 +6,9 @@ Locale = autoclass("java.util.Locale")
 
 
 class _TTSInitListener(PythonJavaClass):
-    __javainterfaces__ = ["android/speech/tts/TextToSpeech$OnInitListener"]
+    __javainterfaces__ = [
+        "android/speech/tts/TextToSpeech$OnInitListener"
+    ]
 
     def __init__(self, engine):
         super().__init__()
@@ -14,18 +16,26 @@ class _TTSInitListener(PythonJavaClass):
 
     @java_method("(I)V")
     def onInit(self, status):
-        self.engine.ready = True
+        if status == TextToSpeech.SUCCESS:
+            self.engine.ready = True
 
 
 class TTSEngine:
+
     def __init__(self, language="en_US"):
         self.language = language
         self.ready = False
+
         self.listener = _TTSInitListener(self)
-        self.tts = TextToSpeech(PythonActivity.mActivity, self.listener)
+
+        self.tts = TextToSpeech(
+            PythonActivity.mActivity,
+            self.listener
+        )
 
     def speak(self, text):
-        if not self.ready or not self.tts:
+
+        if not self.ready:
             return False
 
         try:
@@ -34,15 +44,30 @@ class TTSEngine:
             else:
                 self.tts.setLanguage(Locale.US)
 
-            self.tts.speak(text, TextToSpeech.QUEUE_FLUSH, None, "811")
+            self.tts.speak(
+                text,
+                TextToSpeech.QUEUE_FLUSH,
+                None,
+                "VOICE811"
+            )
+
             return True
+
         except Exception:
             return False
 
     def stop(self):
+
         try:
             if self.tts:
                 self.tts.stop()
+        except Exception:
+            pass
+
+    def shutdown(self):
+
+        try:
+            if self.tts:
                 self.tts.shutdown()
         except Exception:
             pass
