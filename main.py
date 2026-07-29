@@ -15,92 +15,87 @@ from tts_engine import TTSEngine
 
 
 class MainLayout(BoxLayout):
+
     def __init__(self, **kwargs):
-        super().__init__(orientation="vertical", padding=20, spacing=20, **kwargs)
+        super().__init__(orientation="vertical", spacing=15, padding=15, **kwargs)
+
+        self.tts = None
+        self.speech = None
 
         self.status = Label(
-            text="Assistant is stopped",
-            font_size="20sp"
+            text="Voice Assistant 811",
+            font_size="22sp"
         )
         self.add_widget(self.status)
 
-        self.last_text = Label(
-            text="No speech yet",
-            font_size="16sp"
+        self.result = Label(
+            text="Press Start",
+            font_size="18sp"
         )
-        self.add_widget(self.last_text)
+        self.add_widget(self.result)
 
-        self.btn_start = Button(
+        self.start_btn = Button(
             text="Start Assistant",
-            size_hint_y=None,
+            size_hint=(1, None),
             height=60
         )
-        self.btn_start.bind(on_press=self.start_assistant)
-        self.add_widget(self.btn_start)
+        self.start_btn.bind(on_press=self.start_assistant)
+        self.add_widget(self.start_btn)
 
-        self.btn_stop = Button(
+        self.stop_btn = Button(
             text="Stop Assistant",
-            size_hint_y=None,
+            size_hint=(1, None),
             height=60
         )
-        self.btn_stop.bind(on_press=self.stop_assistant)
-        self.add_widget(self.btn_stop)
+        self.stop_btn.bind(on_press=self.stop_assistant)
+        self.add_widget(self.stop_btn)
 
-        self.speech_engine = None
-        self.tts_engine = None
+    def start_assistant(self, *args):
 
-    def start_assistant(self, instance):
         if HAS_ANDROID:
-            try:
-                request_permissions([Permission.RECORD_AUDIO])
-            except Exception as e:
-                self.status.text = f"Permission error: {e}"
-                return
+            request_permissions([Permission.RECORD_AUDIO])
 
-        try:
-            if self.tts_engine is None:
-                self.tts_engine = TTSEngine(language="en_US")
+        self.tts = TTSEngine("en_US")
+        self.speech = SpeechEngine(
+            callback=self.on_result,
+            language="en-US"
+        )
 
-            if self.speech_engine is None:
-                self.speech_engine = SpeechEngine(
-                    callback=self.on_text,
-                    language="en-US"
-                )
+        Clock.schedule_once(self._start, 1.5)
 
-            self.speech_engine.start()
-            self.status.text = "Listening..."
+    def _start(self, dt):
 
-            if self.tts_engine:
-                self.tts_engine.speak("Hello, I am Voice Assistant 811")
+        self.status.text = "Listening..."
 
-        except Exception as e:
-            self.status.text = f"Start error: {e}"
+        self.tts.speak("Hello. Voice Assistant Eight One One is ready.")
 
-    def stop_assistant(self, instance):
-        try:
-            if self.speech_engine:
-                self.speech_engine.stop()
+        self.speech.start()
 
-            if self.tts_engine:
-                self.tts_engine.stop()
+    def stop_assistant(self, *args):
 
-            self.status.text = "Assistant is stopped"
-        except Exception as e:
-            self.status.text = f"Stop error: {e}"
+        if self.speech:
+            self.speech.stop()
 
-    def on_text(self, text):
-        Clock.schedule_once(lambda dt: self.update_text(text))
+        if self.tts:
+            self.tts.stop()
+
+        self.status.text = "Stopped"
+
+    def on_result(self, text):
+
+        Clock.schedule_once(
+            lambda dt: self.update_text(text)
+        )
 
     def update_text(self, text):
-        self.last_text.text = f"Recognized: {text}"
-        self.status.text = "Listening..."
+
+        self.result.text = text
 
 
 class VoiceAssistantApp(App):
+
     def build(self):
-        self.title = "Voice Assistant 811"
         return MainLayout()
 
 
-if __name__ == "__main__":
-    VoiceAssistantApp().run()
+VoiceAssistantApp().run()
