@@ -15,22 +15,28 @@ from tts_engine import TTSEngine
 
 
 class MainLayout(BoxLayout):
-
     def __init__(self, **kwargs):
         super().__init__(orientation="vertical", spacing=15, padding=15, **kwargs)
 
-        self.tts = None
         self.speech = None
+        self.tts = None
+        self.is_running = False
+
+        self.title_label = Label(
+            text="Voice Assistant 811",
+            font_size="24sp"
+        )
+        self.add_widget(self.title_label)
 
         self.status = Label(
-            text="Voice Assistant 811",
-            font_size="22sp"
+            text="Press Start",
+            font_size="18sp"
         )
         self.add_widget(self.status)
 
         self.result = Label(
-            text="Press Start",
-            font_size="18sp"
+            text="No speech yet",
+            font_size="16sp"
         )
         self.add_widget(self.result)
 
@@ -51,51 +57,84 @@ class MainLayout(BoxLayout):
         self.add_widget(self.stop_btn)
 
     def start_assistant(self, *args):
+        if self.is_running:
+            return
 
         if HAS_ANDROID:
-            request_permissions([Permission.RECORD_AUDIO])
+            try:
+                request_permissions([Permission.RECORD_AUDIO])
+            except Exception as e:
+                self.status.text = f"Permission error: {e}"
+                return
 
-        self.tts = TTSEngine("en_US")
-        self.speech = SpeechEngine(
-            callback=self.on_result,
-            language="en-US"
-        )
+        try:
+            if self.tts is None:
+                self.tts = TTSEngine(language="en_US")
 
-        Clock.schedule_once(self._start, 1.5)
+            if self.speech is None:
+                self.speech = SpeechEngine(
+                    callback=self.on_text,
+                    language="en-US"
+                )
 
-    def _start(self, dt):
+            self.status.text = "Starting..."
+            self.is_running = True
 
-        self.status.text = "Listening..."
+            Clock.schedule_once(self._start_session, 1.5)
 
-        self.tts.speak("Hello. Voice Assistant Eight One One is ready.")
+        except Exception as e:
+            self.is_running = False
+            self.status.text = f"Start error: {e}"
 
-        self.speech.start()
+    def _start_session(self, dt):
+        if not self.is_running:
+            return
+
+        try:
+            if self.tts:
+                self.tts.speak("Hello, I am Voice Assistant 811")
+        except Exception:
+            pass
+
+        try:
+            if self.speech:
+                self.speech.start()
+                self.status.text = "Listening..."
+        except Exception as e:
+            self.status.text = f"Speech start error: {e}"
+            self.is_running = False
 
     def stop_assistant(self, *args):
+        self.is_running = False
 
-        if self.speech:
-            self.speech.stop()
+        try:
+            if self.speech:
+                self.speech.stop()
+        except Exception:
+            pass
 
-        if self.tts:
-            self.tts.stop()
+        try:
+            if self.tts:
+                self.tts.stop()
+                self.tts.shutdown()
+        except Exception:
+            pass
 
         self.status.text = "Stopped"
 
-    def on_result(self, text):
+    def on_text(self, text):
+        Clock.schedule_once(lambda dt: self._update_text(text))
 
-        Clock.schedule_once(
-            lambda dt: self.update_text(text)
-        )
-
-    def update_text(self, text):
-
+    def _update_text(self, text):
         self.result.text = text
+        self.status.text = "Listening..."
 
 
 class VoiceAssistantApp(App):
-
     def build(self):
+        self.title = "Voice Assistant 811"
         return MainLayout()
 
 
-VoiceAssistantApp().run()
+if __name__ == "__main__":
+    VoiceAssistantApp().run()
