@@ -5,8 +5,6 @@ RecognizerIntent = autoclass("android.speech.RecognizerIntent")
 Intent = autoclass("android.content.Intent")
 PythonActivity = autoclass("org.kivy.android.PythonActivity")
 
-_CONTEXT = PythonActivity.mActivity
-
 
 class _RecognitionListener(PythonJavaClass):
     __javainterfaces__ = ["android/speech/RecognitionListener"]
@@ -35,8 +33,8 @@ class _RecognitionListener(PythonJavaClass):
     def onEndOfSpeech(self):
         pass
 
-    @java_method("(ILandroid/os/Bundle;)V")
-    def onError(self, error, params):
+    @java_method("(I)V")
+    def onError(self, error):
         if self.engine and self.engine.running:
             self.engine.restart()
 
@@ -45,14 +43,17 @@ class _RecognitionListener(PythonJavaClass):
         if not self.engine:
             return
 
-        matches = results.getStringArrayList(
-            SpeechRecognizer.RESULTS_RECOGNITION
-        )
+        try:
+            matches = results.getStringArrayList(
+                SpeechRecognizer.RESULTS_RECOGNITION
+            )
 
-        if matches and matches.size() > 0:
-            text = matches.get(0)
-            if self.engine.callback:
-                self.engine.callback(text)
+            if matches and matches.size() > 0:
+                text = matches.get(0)
+                if self.engine.callback:
+                    self.engine.callback(text)
+        except Exception:
+            pass
 
         if self.engine.running:
             self.engine.restart()
@@ -61,13 +62,12 @@ class _RecognitionListener(PythonJavaClass):
     def onPartialResults(self, bundle):
         pass
 
-    @java_method("(I)V")
-    def onEvent(self, eventType):
+    @java_method("(ILandroid/os/Bundle;)V")
+    def onEvent(self, eventType, params):
         pass
 
 
 class SpeechEngine:
-
     def __init__(self, callback=None, language="en-US"):
         self.callback = callback
         self.language = language
@@ -81,11 +81,16 @@ class SpeechEngine:
 
         self.running = True
 
-        self.recognizer = SpeechRecognizer.createSpeechRecognizer(_CONTEXT)
-        self.listener = _RecognitionListener(self)
-        self.recognizer.setRecognitionListener(self.listener)
-
-        self.start_listening()
+        try:
+            context = PythonActivity.mActivity
+            self.recognizer = SpeechRecognizer.createSpeechRecognizer(context)
+            self.listener = _RecognitionListener(self)
+            self.recognizer.setRecognitionListener(self.listener)
+            self.start_listening()
+        except Exception as e:
+            self.running = False
+            if self.callback:
+                self.callback(f"[Speech start error] {e}")
 
     def stop(self):
         self.running = False
@@ -110,25 +115,13 @@ class SpeechEngine:
         self.listener = None
 
     def build_intent(self):
-        intent = Intent(
-            RecognizerIntent.ACTION_RECOGNIZE_SPEECH
-        )
-
+        intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         intent.putExtra(
             RecognizerIntent.EXTRA_LANGUAGE_MODEL,
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
         )
-
-        intent.putExtra(
-            RecognizerIntent.EXTRA_LANGUAGE,
-            self.language
-        )
-
-        intent.putExtra(
-            RecognizerIntent.EXTRA_MAX_RESULTS,
-            1
-        )
-
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, self.language)
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
         return intent
 
     def start_listening(self):
@@ -136,14 +129,14 @@ class SpeechEngine:
             return
 
         try:
-            self.recognizer.startListening(
-                self.build_intent()
-            )
-        except Exception:
+            self.recognizer.startListening(self.build_intent())
+        except Exception as e:
+            if self.callback:
+                self.callback(f"[Speech listening error] {e}")
             self.restart()
 
     def restart(self):
-        if not self.running:
+        if not self.running or not self.recognizer:
             return
 
         try:
@@ -152,8 +145,8 @@ class SpeechEngine:
             pass
 
         try:
-            self.recognizer.startListening(
-                self.build_intent()
-            )
-        except Exception:
+            self.recognizer.startListening(self.build_intent())
+        except Exception as e:
             self.running = False
+            if self.callback:
+                self.callback(f"[Speech restart error] {e}")
