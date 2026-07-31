@@ -2,12 +2,14 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     container:
       image: kivy/buildozer:latest
 
@@ -15,11 +17,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Disable root warning
+        run: |
+          sed -i 's/^warn_on_root *= *.*/warn_on_root = 0/' buildozer.spec
+          grep warn_on_root buildozer.spec || echo "warn_on_root = 0" >> buildozer.spec
+
       - name: Build APK
         run: buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        if: success()
         with:
-          name: VoiceAssistant_811_APK
+          name: APK
           path: bin/*.apk
