@@ -22,37 +22,20 @@ class MainLayout(BoxLayout):
         self.tts = None
         self.is_running = False
 
-        self.title_label = Label(
-            text="Voice Assistant 811",
-            font_size="24sp"
-        )
+        self.title_label = Label(text="Voice Assistant 811", font_size="24sp")
         self.add_widget(self.title_label)
 
-        self.status = Label(
-            text="Press Start",
-            font_size="18sp"
-        )
+        self.status = Label(text="Press Start", font_size="18sp")
         self.add_widget(self.status)
 
-        self.result = Label(
-            text="No speech yet",
-            font_size="16sp"
-        )
+        self.result = Label(text="No speech yet", font_size="16sp")
         self.add_widget(self.result)
 
-        self.start_btn = Button(
-            text="Start Assistant",
-            size_hint=(1, None),
-            height=60
-        )
+        self.start_btn = Button(text="Start Assistant", size_hint=(1, None), height=60)
         self.start_btn.bind(on_press=self.start_assistant)
         self.add_widget(self.start_btn)
 
-        self.stop_btn = Button(
-            text="Stop Assistant",
-            size_hint=(1, None),
-            height=60
-        )
+        self.stop_btn = Button(text="Stop Assistant", size_hint=(1, None), height=60)
         self.stop_btn.bind(on_press=self.stop_assistant)
         self.add_widget(self.stop_btn)
 
@@ -72,15 +55,11 @@ class MainLayout(BoxLayout):
                 self.tts = TTSEngine(language="en_US")
 
             if self.speech is None:
-                self.speech = SpeechEngine(
-                    callback=self.on_text,
-                    language="en-US"
-                )
+                self.speech = SpeechEngine(callback=self.on_text, language="en-US")
 
             self.status.text = "Starting..."
             self.is_running = True
-
-            Clock.schedule_once(self._start_session, 1.5)
+            Clock.schedule_once(self._start_session, 2.0)
 
         except Exception as e:
             self.is_running = False
@@ -91,7 +70,7 @@ class MainLayout(BoxLayout):
             return
 
         try:
-            if self.tts:
+            if self.tts and self.tts.ready:
                 self.tts.speak("Hello, I am Voice Assistant 811")
         except Exception:
             pass
