@@ -1,4 +1,5 @@
 from jnius import autoclass, PythonJavaClass, java_method
+from threading import Timer
 
 SpeechRecognizer = autoclass("android.speech.SpeechRecognizer")
 RecognizerIntent = autoclass("android.speech.RecognizerIntent")
@@ -36,7 +37,7 @@ class _RecognitionListener(PythonJavaClass):
     @java_method("(I)V")
     def onError(self, error):
         if self.engine and self.engine.running:
-            self.engine.restart()
+            self.engine.restart_later()
 
     @java_method("(Landroid/os/Bundle;)V")
     def onResults(self, results):
@@ -47,7 +48,6 @@ class _RecognitionListener(PythonJavaClass):
             matches = results.getStringArrayList(
                 SpeechRecognizer.RESULTS_RECOGNITION
             )
-
             if matches and matches.size() > 0:
                 text = matches.get(0)
                 if self.engine.callback:
@@ -56,7 +56,7 @@ class _RecognitionListener(PythonJavaClass):
             pass
 
         if self.engine.running:
-            self.engine.restart()
+            self.engine.restart_later()
 
     @java_method("(Landroid/os/Bundle;)V")
     def onPartialResults(self, bundle):
@@ -125,7 +125,7 @@ class SpeechEngine:
         return intent
 
     def start_listening(self):
-        if not self.recognizer:
+        if not self.recognizer or not self.running:
             return
 
         try:
@@ -133,7 +133,12 @@ class SpeechEngine:
         except Exception as e:
             if self.callback:
                 self.callback(f"[Speech listening error] {e}")
-            self.restart()
+            self.restart_later()
+
+    def restart_later(self):
+        if not self.running:
+            return
+        Timer(0.6, self.restart).start()
 
     def restart(self):
         if not self.running or not self.recognizer:
