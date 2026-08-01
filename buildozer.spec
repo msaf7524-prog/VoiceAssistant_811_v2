@@ -15,10 +15,7 @@ android.permissions = INTERNET,RECORD_AUDIO,BLUETOOTH,BLUETOOTH_ADMIN,BLUETOOTH_
 android.api = 33
 android.minapi = 21
 android.private_storage = True
-android.skip_update = False
 android.accept_sdk_license = True
-
-android.entrypoint = org.kivy.android.PythonActivity
 
 orientation = portrait
 fullscreen = 0
