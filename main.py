@@ -25,17 +25,17 @@ class MainLayout(BoxLayout):
         self.title_label = Label(text="Voice Assistant 811", font_size="24sp")
         self.add_widget(self.title_label)
 
-        self.status = Label(text="Press Start", font_size="18sp")
+        self.status = Label(text="اضغط ابدأ لتشغيل المساعد", font_size="18sp")
         self.add_widget(self.status)
 
-        self.result = Label(text="No speech yet", font_size="16sp")
+        self.result = Label(text="في انتظار الكلام...", font_size="16sp")
         self.add_widget(self.result)
 
-        self.start_btn = Button(text="Start Assistant", size_hint=(1, None), height=60)
+        self.start_btn = Button(text="بدء المساعد", size_hint=(1, None), height=60)
         self.start_btn.bind(on_press=self.start_assistant)
         self.add_widget(self.start_btn)
 
-        self.stop_btn = Button(text="Stop Assistant", size_hint=(1, None), height=60)
+        self.stop_btn = Button(text="إيقاف المساعد", size_hint=(1, None), height=60)
         self.stop_btn.bind(on_press=self.stop_assistant)
         self.add_widget(self.stop_btn)
 
@@ -45,25 +45,30 @@ class MainLayout(BoxLayout):
 
         if HAS_ANDROID:
             try:
-                request_permissions([Permission.RECORD_AUDIO])
+                # طلب صلاحيات تسجيل الصوت والبلوتوث
+                request_permissions([
+                    Permission.RECORD_AUDIO,
+                    Permission.BLUETOOTH_CONNECT
+                ])
             except Exception as e:
-                self.status.text = f"Permission error: {e}"
+                self.status.text = f"خطأ في الصلاحيات: {e}"
                 return
 
         try:
+            # ضبط محرك النطق والاستماع للغة العربية
             if self.tts is None:
-                self.tts = TTSEngine(language="en_US")
+                self.tts = TTSEngine(language="ar")
 
             if self.speech is None:
-                self.speech = SpeechEngine(callback=self.on_text, language="en-US")
+                self.speech = SpeechEngine(callback=self.on_text, language="ar-SA")
 
-            self.status.text = "Starting..."
+            self.status.text = "جاري البدء..."
             self.is_running = True
             Clock.schedule_once(self._start_session, 2.0)
 
         except Exception as e:
             self.is_running = False
-            self.status.text = f"Start error: {e}"
+            self.status.text = f"خطأ في التشغيل: {e}"
 
     def _start_session(self, dt):
         if not self.is_running:
@@ -71,16 +76,16 @@ class MainLayout(BoxLayout):
 
         try:
             if self.tts and self.tts.ready:
-                self.tts.speak("Hello, I am Voice Assistant 811")
+                self.tts.speak("أهلاً بك، أنا المساعد الصوتي 811")
         except Exception:
             pass
 
         try:
             if self.speech:
                 self.speech.start()
-                self.status.text = "Listening..."
+                self.status.text = "جاري الاستماع..."
         except Exception as e:
-            self.status.text = f"Speech start error: {e}"
+            self.status.text = f"خطأ في بدء الاستماع: {e}"
             self.is_running = False
 
     def stop_assistant(self, *args):
@@ -99,14 +104,14 @@ class MainLayout(BoxLayout):
         except Exception:
             pass
 
-        self.status.text = "Stopped"
+        self.status.text = "تم الإيقاف"
 
     def on_text(self, text):
         Clock.schedule_once(lambda dt: self._update_text(text))
 
     def _update_text(self, text):
         self.result.text = text
-        self.status.text = "Listening..."
+        self.status.text = "جاري الاستماع..."
 
 
 class VoiceAssistantApp(App):
