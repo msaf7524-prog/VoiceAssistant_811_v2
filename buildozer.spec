@@ -6,23 +6,22 @@ title = VoiceAssistant 811
 # (str) Package name
 package.name = voiceassistant811
 
-# (str) Package domain (needed for android packaging)
+# (str) Package domain (needed for android/ios packaging)
 package.domain = org.test
-
-# (str) Application version
-version = 0.1
 
 # (str) Source code where the main.py live
 source.dir = .
 
-# (list) Source files to include (let empty to include all the source directory)
-source.include_exts = py,png,jpg,kv,atlas,wav,mp3
+# (list) Source files to include (let empty to include all the files)
+source.include_exts = py,png,jpg,kv,atlas,wav,json
 
 # (list) Application requirements
-requirements = python3,kivy==2.3.0,kivymd,pyjnius
+# يمكنك إضافة أي مكتبات بايثون إضافية تحتاجها التطبيق هنا تفصل بينها بفواصل
+requirements = python3,kivy,pyobjus,android
 
 # (str) Custom source folders for requirements
-# requirements.source.kivy = ../kivy
+# Change it if you want to send custom commands to pygame
+#requirements.source.kivy =
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
@@ -31,36 +30,37 @@ orientation = portrait
 fullscreen = 0
 
 # (list) Permissions
-permissions = RECORD_AUDIO, INTERNET, BLUETOOTH, BLUETOOTH_ADMIN, BLUETOOTH_CONNECT
+# الأذونات الأساسية للتعامل مع الصوت والبلوتوث
+android.permissions = INTERNET,RECORD_AUDIO,BLUETOOTH,BLUETOOTH_ADMIN,BLUETOOTH_CONNECT
 
-# (int) Target Android API
+# (int) Target Android API, should be one of the available API levels
 android.api = 33
 
-# (int) Minimum API your APK will support
+# (int) Minimum API your APK will support.
 android.minapi = 21
 
 # (str) Android NDK version to use
 android.ndk = 25b
 
-# (str) Android SDK build tools version to use
-android.sdk_build_tools_version = 33.0.2
+# (str) Android build tools version to use (تحديد إصدار مستقر لمنع استدعاء 37.0.0)
+android.build_tools_version = 33.0.2
 
-# (bool) If True, then automatically accept SDK licenses
-android.accept_sdk_licenses = True
+# (bool) If True, then accept all SDK licences automatically
+android.accept_sdk_license = True
+
+# (list) List of service to declare
+# services = MyService:service.py
 
 # (str) The Android arch to build for
 android.archs = arm64-v8a, armeabi-v7a
 
-# (bool) Enable AndroidX support
+# (bool) Enable AndroidX support. Required for NDK >= 21
 android.enable_androidx = True
-
-# (list) Gradle dependencies
-# android.gradle_dependencies = 
 
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
 log_level = 2
 
-# (int) Display warning if buildozer is run as root (0 = ignore, 1 = warn, 2 = error)
+# (int) Display warning if buildozer is run as root (0 = false, 1 = true)
 warn_on_root = 1
