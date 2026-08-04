@@ -41,17 +41,16 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install "cython<3" buildozer virtualenv
 
-      - name: Pre-accept Android SDK Licenses
+      - name: Init SDK and Accept Licenses
         run: |
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
-          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          printf "893704667450112217b71379d972d473970d8419\n24333f8a63717208d132635a9cc5f67a21b3693e\n504667450112217b71379d972d473970d8419\ncd50112217b71379d972d473970d8419" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-          printf "84449eb562853f314e6a06b12743637de96b92f" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+          # تشغيل أولي لتنزيل SDK
+          buildozer android debug || true
+          # قبول التراخيص فوراً بعد تنزيل الأدوات
+          yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Build APK
-        env:
-          APP_ANDROID_ACCEPT_SDK_LICENSES: "1"
+      - name: Build Final APK
         run: |
           buildozer android debug
 
