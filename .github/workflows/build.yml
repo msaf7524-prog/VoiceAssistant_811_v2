@@ -41,8 +41,16 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install "cython<3" buildozer virtualenv
 
-      - name: Accept Android SDK Licenses & Build
+      - name: Auto Accept Licenses and Build
         run: |
+          mkdir -p ~/.android
+          touch ~/.android/repositories.cfg
+          buildozer android debug || true
+          if [ -d "$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin" ]; then
+            yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          elif [ -d "$HOME/.buildozer/android/platform/android-sdk/tools/bin" ]; then
+            yes | $HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --licenses || true
+          fi
           buildozer android debug
 
       - name: Upload APK
