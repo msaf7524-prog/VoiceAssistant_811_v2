@@ -45,11 +45,8 @@ jobs:
         env:
           APP_ANDROID_ACCEPT_SDK_LICENSES: "1"
         run: |
-          # تنظيف أي مخلفات سابقة لضمان بناء نظيف
           rm -rf ~/.buildozer
-          
-          # تشغيل Buildozer وتزويده بالموافقة التلقائية على الشروط
-          yes | buildozer android debug
+          buildozer --warn-on-root 0 android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
