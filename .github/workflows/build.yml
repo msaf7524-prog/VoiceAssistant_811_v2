@@ -41,17 +41,21 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install "cython<3" buildozer virtualenv
 
-      - name: Init SDK and Accept Licenses
+      - name: Build APK with Auto Licenses
         run: |
           mkdir -p ~/.android
           touch ~/.android/repositories.cfg
-          # تشغيل أولي لتنزيل SDK
+          
+          # تهيئة التنزيل الأولية
           buildozer android debug || true
-          # قبول التراخيص فوراً بعد تنزيل الأدوات
-          yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      - name: Build Final APK
-        run: |
+          # البحث عن sdkmanager في أي مسار موجود وقبول التراخيص
+          SDKMANAGER=$(find $HOME/.buildozer/android/platform/android-sdk -name "sdkmanager" | head -n 1)
+          if [ -n "$SDKMANAGER" ]; then
+            yes | $SDKMANAGER --licenses || true
+          fi
+
+          # إكمال البناء النهائي
           buildozer android debug
 
       - name: Upload APK
