@@ -9,6 +9,9 @@ package.name = voiceassistant811
 # (str) Package domain (needed for android packaging)
 package.domain = org.test
 
+# (str) Application version
+version = 0.1
+
 # (str) Source code where the main.py live
 source.dir = .
 
@@ -16,7 +19,6 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,wav,mp3
 
 # (list) Application requirements
-# ملاحظة: تم ضبط cython و kivy ومكتبات الأساس
 requirements = python3,kivy==2.3.0,kivymd,pyjnius
 
 # (str) Custom source folders for requirements
@@ -29,10 +31,9 @@ orientation = portrait
 fullscreen = 0
 
 # (list) Permissions
-# الأذونات المطلوبة للتسجيل والصوت والبلوتوث
 permissions = RECORD_AUDIO, INTERNET, BLUETOOTH, BLUETOOTH_ADMIN, BLUETOOTH_CONNECT
 
-# (int) Target Android API, should be 33 for current stable requirements
+# (int) Target Android API
 android.api = 33
 
 # (int) Minimum API your APK will support
@@ -41,7 +42,7 @@ android.minapi = 21
 # (str) Android NDK version to use
 android.ndk = 25b
 
-# (str) Android SDK build tools version to use (تثبيت الإصدار المستقر)
+# (str) Android SDK build tools version to use
 android.sdk_build_tools_version = 33.0.2
 
 # (bool) If True, then automatically accept SDK licenses
