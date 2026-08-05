@@ -15,7 +15,7 @@ source.dir = .
 # (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas,wav,json
 
-# (str) Application versioning (يجب تحديد رقم الإصدار هنا)
+# (str) Application versioning
 version = 1.0
 
 # (list) Application requirements
@@ -50,6 +50,9 @@ android.archs = arm64-v8a, armeabi-v7a
 
 # (bool) Enable AndroidX support. Required for NDK >= 21
 android.enable_androidx = True
+
+# (str) python-for-android branch to use
+p4a.branch = develop
 
 [buildozer]
 
