@@ -15,13 +15,11 @@ source.dir = .
 # (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas,wav,json
 
-# (list) Application requirements
-# يمكنك إضافة أي مكتبات بايثون إضافية تحتاجها التطبيق هنا تفصل بينها بفواصل
-requirements = python3,kivy,pyobjus,android
+# (str) Application versioning (يجب تحديد رقم الإصدار هنا)
+version = 1.0
 
-# (str) Custom source folders for requirements
-# Change it if you want to send custom commands to pygame
-#requirements.source.kivy =
+# (list) Application requirements
+requirements = python3,kivy,pyobjus,android
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
@@ -30,7 +28,6 @@ orientation = portrait
 fullscreen = 0
 
 # (list) Permissions
-# الأذونات الأساسية للتعامل مع الصوت والبلوتوث
 android.permissions = INTERNET,RECORD_AUDIO,BLUETOOTH,BLUETOOTH_ADMIN,BLUETOOTH_CONNECT
 
 # (int) Target Android API, should be one of the available API levels
@@ -42,14 +39,11 @@ android.minapi = 21
 # (str) Android NDK version to use
 android.ndk = 25b
 
-# (str) Android build tools version to use (تحديد إصدار مستقر لمنع استدعاء 37.0.0)
+# (str) Android build tools version to use
 android.build_tools_version = 33.0.2
 
 # (bool) If True, then accept all SDK licences automatically
 android.accept_sdk_license = True
-
-# (list) List of service to declare
-# services = MyService:service.py
 
 # (str) The Android arch to build for
 android.archs = arm64-v8a, armeabi-v7a
