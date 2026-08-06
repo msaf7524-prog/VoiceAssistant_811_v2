@@ -7,19 +7,20 @@ title = VoiceAssistant 811
 package.name = voiceassistant811
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.test
+package.domain = org.msaf
 
 # (str) Source code where the main.py live
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,wav,json
+source.include_exts = py,png,jpg,kv,atlas,wav,mp3
 
 # (str) Application versioning
 version = 1.0
 
 # (list) Application requirements
-requirements = python3,kivy,pyobjus,android
+# استخدمنا إصدار 2.2.1 المستقر لتخطي خطأ libthorvg
+requirements = python3,kivy==2.2.1,pyobjus,android
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
@@ -28,7 +29,8 @@ orientation = portrait
 fullscreen = 0
 
 # (list) Permissions
-android.permissions = INTERNET,RECORD_AUDIO,BLUETOOTH,BLUETOOTH_ADMIN,BLUETOOTH_CONNECT
+# صلاحيات الميكروفون والبلوتوث والإنترنت الخاصة بالمساعد الصوتي
+android.permissions = INTERNET,RECORD_AUDIO,BLUETOOTH,BLUETOOTH_ADMIN,BLUETOOTH_CONNECT,MODIFY_AUDIO_SETTINGS
 
 # (int) Target Android API, should be one of the available API levels
 android.api = 33
@@ -52,7 +54,11 @@ android.archs = arm64-v8a, armeabi-v7a
 android.enable_androidx = True
 
 # (str) python-for-android branch to use
+# استخدمنا develop لتخطي خطأ pip
 p4a.branch = develop
+
+# (str) Bootstrap to use for android builds
+p4a.bootstrap = sdl2
 
 [buildozer]
 
