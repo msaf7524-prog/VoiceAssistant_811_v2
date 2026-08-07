@@ -41,27 +41,27 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install "cython<3" buildozer virtualenv
 
+      - name: Cache Buildozer global directory
+        uses: actions/cache@v4
+        with:
+          path: .buildozer_global
+          key: buildozer-global-v1-${{ hashFiles('buildozer.spec') }}
+
+      - name: Cache Buildozer directory
+        uses: actions/cache@v4
+        with:
+          path: .buildozer
+          key: ${{ runner.os }}-buildozer-v1-${{ hashFiles('buildozer.spec') }}
+
       - name: Accept Android SDK Licenses & Build
         env:
           APP_ANDROID_ACCEPT_SDK_LICENSES: "1"
         run: |
-          # قبول كافة رخص الـ SDK تلقائياً قبل بدء التشغيل
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
-          
-          # تشغيل البناء مع الموافقة التلقائية عبر الأنبوب لمنع التوقف
-          yes | buildozer android debug || true
-          
-          # قبول أي رخص متبقية بعد التنزيل المبدئي للأدوات
-          if [ -d "$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin" ]; then
-            yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          fi
-
-          # إعادة تشغيل البناء للتأكد من تجميعه بنجاح بعد استيفاء الشروط
-          buildozer android debug
+          yes | buildozer android debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: VoiceAssistant-811-APK
           path: bin/*.apk
+          
