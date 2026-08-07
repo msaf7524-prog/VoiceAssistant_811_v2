@@ -102,7 +102,27 @@ class SpeechEngine:
     @run_on_ui_thread
     def _init_and_start_ui(self):
         try:
-            context = PythonActivity.mActivity
+            # --- تعديل محوري لخدمات الخلفية ---
+            context = None
+            try:
+                # محاولة جلب سياق الواجهة أولاً
+                if PythonActivity.mActivity:
+                    context = PythonActivity.mActivity
+            except Exception:
+                pass
+            
+            if context is None:
+                try:
+                    # إذا لم تكن الواجهة موجودة (التطبيق في الخلفية)، نجلب سياق الخدمة
+                    PythonService = autoclass("org.kivy.android.PythonService")
+                    context = PythonService.mService
+                except Exception:
+                    pass
+
+            if context is None:
+                raise Exception("Context is completely completely None! (لا Activity ولا Service)")
+            # ------------------------------------
+
             if self.recognizer is None:
                 self.recognizer = SpeechRecognizer.createSpeechRecognizer(context)
                 self.listener = _RecognitionListener(self)
