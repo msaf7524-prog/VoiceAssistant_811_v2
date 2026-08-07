@@ -49,9 +49,28 @@ class TTSEngine:
 
         if HAS_ANDROID:
             try:
+                # --- التعديل الديناميكي لسياق العمل (Context) ---
+                context = None
+                try:
+                    if PythonActivity.mActivity:
+                        context = PythonActivity.mActivity
+                except Exception:
+                    pass
+                
+                if context is None:
+                    try:
+                        PythonService = autoclass("org.kivy.android.PythonService")
+                        context = PythonService.mService
+                    except Exception:
+                        pass
+                        
+                if context is None:
+                    raise Exception("Context is completely None! (لا Activity ولا Service)")
+                # ------------------------------------------------
+
                 self.listener = _TTSInitListener(self)
                 self.tts = TextToSpeech(
-                    PythonActivity.mActivity,
+                    context,
                     self.listener
                 )
             except Exception as e:
