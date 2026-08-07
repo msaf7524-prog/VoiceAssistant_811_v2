@@ -19,7 +19,8 @@ source.include_exts = py,png,jpg,kv,atlas,wav,mp3
 version = 1.0
 
 # (list) Application requirements
-requirements = python3,kivy==2.3.0,pyobjus,android
+# تمت إزالة pyobjus وإضافة pyjnius و plyer لدعم ميزات الأندرويد والخدمات الخلفية
+requirements = python3,kivy==2.3.0,android,pyjnius,plyer
 
 # (str) Supported orientation
 orientation = portrait
@@ -28,7 +29,12 @@ orientation = portrait
 fullscreen = 0
 
 # (list) Permissions
-android.permissions = INTERNET,RECORD_AUDIO,BLUETOOTH,BLUETOOTH_ADMIN,BLUETOOTH_CONNECT,MODIFY_AUDIO_SETTINGS
+# تمت إضافة صلاحيات الـ Wake Lock والـ Foreground Service الإلزامية في API 34
+android.permissions = INTERNET,RECORD_AUDIO,BLUETOOTH,BLUETOOTH_ADMIN,BLUETOOTH_CONNECT,MODIFY_AUDIO_SETTINGS,WAKE_LOCK,FOREGROUND_SERVICE,FOREGROUND_SERVICE_MICROPHONE,FOREGROUND_SERVICE_CONNECTED_DEVICE
+
+# (list) Services
+# هذا السطر ضروري جداً لكي يعمل التطبيق ويرد على الأوامر بدون فتح الشاشة
+services = VoiceService:service.py
 
 # (int) Target Android API
 android.api = 34
